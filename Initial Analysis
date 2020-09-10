@@ -1,0 +1,54 @@
+#Importing Data
+data <- read.csv('Housing_2020.csv',header = TRUE)
+head(data)
+
+```{r}
+#Information about the data
+summary(data)
+is.null(data)
+```
+```{r}
+#Converting Zipcode from numerical variable to categorical variable
+data$ZIP.OR.POSTAL.CODE <- as.character(data$ZIP.OR.POSTAL.CODE)
+```
+```{r}
+#Data visualization using Esquisse package
+esquisse::esquisser()
+```
+```{r}
+#Changing the column names as per convenience 
+names(data)[names(data) == "ZIP.OR.POSTAL.CODE"] <- "Postalcode"
+names(data)[names(data) == "PROPERTY.TYPE"] <- "Propertytype"
+names(data)[names(data) == "SQUARE.FEET"] <- "Squarefeet"
+names(data)[names(data) == "LOT.SIZE"] <- "Lotsize"
+names(data)[names(data) == "YEAR.BUILT"] <- "Yearbuilt"
+```
+```{r}
+#SQL Code for creating the table for Tab2
+tb <- sqldf('select Postalcode, Propertytype,
+       AVG(PRICE) AS MEDIANVAL 
+FROM   (SELECT Postalcode, Propertytype,
+               PRICE, 
+               ROW_NUMBER() 
+                 OVER ( 
+                   PARTITION BY Postalcode 
+                   ORDER BY PRICE ASC, Postalcode ASC) AS ROWASC, 
+               ROW_NUMBER() 
+                 OVER ( 
+                   PARTITION BY Postalcode 
+                   ORDER BY PRICE DESC)                   AS ROWDESC 
+        FROM   data SOH
+        where Propertytype in (\"Single Family Residential\", \"Townhouse\")) X 
+WHERE  ROWASC IN ( ROWDESC, ROWDESC - 1, ROWDESC + 1 ) 
+GROUP  BY Postalcode 
+ORDER  BY PRICE desc, Propertytype')
+```
+```{r}
+lb <- sqldf('SELECT
+    Postalcode, 
+    max(case when Propertytype = \'Single Family Residential\'  then MEDIANVAL ELSE NULL end) AS SingleFamilyResidential,
+    max(case when Propertytype = \'Townhouse\'  then MEDIANVAL ELSE NULL end) AS Townhouse
+FROM tb
+GROUP BY Postalcode
+ORDER BY SingleFamilyResidential desc')
+```
