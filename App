@@ -1,0 +1,108 @@
+```{r}
+#UI
+ui <-  fluidPage( 
+  h1("Dallas Housing Data"),
+
+  #TAB 1 
+  tabsetPanel(
+ tabPanel("Price Distribution based on the zipcode",
+  
+  sidebarLayout(
+   
+    sidebarPanel(
+      
+      #Input to select Zipcode
+       selectInput(inputId = "x",
+                  label = "Choose ZipCode",
+                  choices = data$Postalcode,
+                  selected = "75234",
+                  multiple = TRUE),
+      
+    ), #Sidebarpanel
+    
+     # Main panel for displaying outputs 
+     mainPanel(
+      
+      # Output: Histogram
+      plotOutput(outputId = "histogram")
+      
+    ) #mainpanel
+    
+  ) #sidebarlayout
+  
+), #tabpanel
+
+#TAB 2
+ tabPanel("Median Property Price By Property Type", 
+
+           # Main panel for displaying outputs 
+          mainPanel(
+            
+            #Output : Data Table
+            dataTableOutput(outputId = "table")
+            
+          ) #mainpanel
+
+ ), #tabpanel
+
+#TAB 3
+  tabPanel("Median Property Price By Various Categories", 
+        sidebarLayout( 
+          sidebarPanel(
+            
+            # Input variables
+      sliderInput(inputId = "a",
+                   label = "Number of beds",
+                   min = 0, max = 10,
+                   value = 1),
+      
+      sliderInput(inputId = "b",
+                   label = "Number of baths",
+                   min = 0.5, max = 10,
+                 value = 1),
+      
+      sliderInput(inputId = "c",
+                   label = "Square feet", 
+                 min = 419, max = 27075,
+                 value = 419),
+
+     sliderInput(inputId = "d",
+                   label = "Lot size", 
+                   min = 44, max = 9626760,
+                   value = 44),
+
+      sliderInput(inputId = "e",
+                   label = "Year built",
+                   min = 1868, max = 2021,
+                   value = 1868)
+     ), #sidebarpanel
+
+     # Main panel for displaying outputs 
+     mainPanel(
+       
+       # Output: Boxplot
+       plotOutput(outputId = "boxplot")
+       
+     ) #mainpanel
+     
+   ) #sidebarlayout
+   
+ ), #tabpanel
+
+#TAB 4
+tabPanel("Map of Properties", 
+         
+            # Main panel for displaying outputs 
+            mainPanel( 
+              
+              #Output: Map
+leafletOutput(outputId = "mymap", height = 1000, width = 1000)
+
+) #mainpanel
+
+) #tabpanel
+
+) #tabsetpanel
+
+) #fluidpage
+```
