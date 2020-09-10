@@ -1,0 +1,37 @@
+```{r}
+#Server
+server <- function(input, output, session){
+  
+  #TAB 1
+  output$histogram <- renderPlot({
+    data %>%
+      filter(Postalcode == input$x) %>%
+      ggplot(aes(x = PRICE)) +
+      geom_histogram()
+  })
+  
+  #TAB 2
+  output$table <- renderDataTable({
+    datatable(lb)
+  })
+  
+  #TAB 3
+  output$boxplot <- renderPlot({
+  ss = subset(data,BEDS>=input$a & BATHS>=input$b & Squarefeet >= input$c & Lotsize>=input$d & Yearbuilt>=input$e)
+boxplot(ss$PRICE, ylab="Price", na.action=FALSE)
+   })
+  
+  #TAB 4
+  output$mymap <- renderLeaflet({
+    leaflet(data) %>% 
+      setView(lng = -97.309341, lat = 32.768799, zoom = 8)  %>%
+      addTiles() %>% 
+      addCircleMarkers(data = data, lat = ~ LATITUDE, lng = ~ LONGITUDE, label = paste0( "PropertyType:"
+                 , data$Propertytype, ", ", "Address:", data$ADDRESS, ", ", "City:", data$CITY, ", ", "Zipcode:", data$Postalcode, ", ", "Price:", data$PRICE, ", ", "Beds:", data$BEDS, ", ", "Baths:", data$BATHS, ", ", "SquareFeet:", data$Squarefeet, ", ", "YearBuilt:", data$Yearbuilt))
+  })
+}
+```
+```{r}
+#ShinyApp
+shinyApp(ui, server)
+```
